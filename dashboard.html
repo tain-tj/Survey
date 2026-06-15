@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard สถิติเคหะรักษ์ | BCH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style> body { font-family: 'Prompt', sans-serif; } </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-blue-900"><i class="fa-solid fa-chart-pie mr-2"></i> Dashboard สถิติความพึงพอใจ</h1>
+                <p class="text-slate-500 text-sm mt-1">แผนกเคหะรักษ์ โรงพยาบาลกรุงเทพคริสเตียน</p>
+            </div>
+            <button onclick="fetchData()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl text-sm font-medium shadow-sm transition-all flex items-center gap-2">
+                <i class="fa-solid fa-rotate-right"></i> รีเฟรชข้อมูล
+            </button>
+        </div>
+
+        <div id="loading" class="text-center py-20">
+            <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500 mb-4"></i>
+            <p class="text-slate-500">กำลังดึงข้อมูลสถิติ...</p>
+        </div>
+
+        <div id="dashboardContent" class="hidden space-y-6">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 text-xl"><i class="fa-solid fa-users"></i></div>
+                    <div>
+                        <p class="text-slate-500 text-sm">จำนวนผู้ประเมิน</p>
+                        <h3 class="text-2xl font-bold text-slate-800" id="totalResponses">0</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 text-xl"><i class="fa-solid fa-star"></i></div>
+                    <div>
+                        <p class="text-slate-500 text-sm">คะแนนภาพรวมเฉลี่ย</p>
+                        <h3 class="text-2xl font-bold text-slate-800" id="avgOverall">0.00</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-green-600 text-xl"><i class="fa-solid fa-bolt"></i></div>
+                    <div>
+                        <p class="text-slate-500 text-sm">ความรวดเร็วเฉลี่ย</p>
+                        <h3 class="text-2xl font-bold text-slate-800" id="avgSpeed">0.00</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 text-xl"><i class="fa-solid fa-broom"></i></div>
+                    <div>
+                        <p class="text-slate-500 text-sm">คุณภาพงานเฉลี่ย</p>
+                        <h3 class="text-2xl font-bold text-slate-800" id="avgQuality">0.00</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2">
+                    <h3 class="text-md font-semibold text-slate-800 mb-4">คะแนนเฉลี่ยแยกตามหัวข้อการประเมิน</h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-md font-semibold text-slate-800 mb-4">สัดส่วนคะแนนความพึงพอใจรวม</h3>
+                    <div class="relative h-64 w-full flex justify-center">
+                        <canvas id="doughnutChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // *** สำคัญมาก: นำ URL Web App ของ Google Apps Script มาใส่ตรงนี้ ***
+        const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzLFGhinEUTxIOJ8SgoD-mdaP8I9AEjq44jCN_nse5-AYWhcJkGIEOJf3tRTgAVU94q/exec";
+
+        let barChartInstance = null;
+        let doughnutChartInstance = null;
+
+        // ฟังก์ชันคำนวณค่าเฉลี่ย
+        const getAverage = (arr) => arr.length ? (arr.reduce((a, b) => a + Number(b), 0) / arr.length).toFixed(2) : "0.00";
+
+        async function fetchData() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('dashboardContent').classList.add('hidden');
+
+            try {
+                const response = await fetch(APP_SCRIPT_URL);
+                const result = await response.json();
+
+                if(result.status === 'success') {
+                    const data = result.data.filter(row => row.scoreOverall); // กรองเอาเฉพาะแถวที่มีข้อมูล
+                    
+                    // อัปเดตการ์ดตัวเลข
+                    document.getElementById('totalResponses').innerText = data.length;
+                    
+                    const scoresOverall = data.map(r => r.scoreOverall);
+                    const scoresSpeed = data.map(r => r.scoreSpeed);
+                    const scoresQuality = data.map(r => r.scoreQuality);
+                    const scoresSystem = data.map(r => r.scoreSystem);
+                    const scoresManner = data.map(r => r.scoreManner);
+
+                    document.getElementById('avgOverall').innerText = getAverage(scoresOverall);
+                    document.getElementById('avgSpeed').innerText = getAverage(scoresSpeed);
+                    document.getElementById('avgQuality').innerText = getAverage(scoresQuality);
+
+                    // สร้างกราฟ
+                    renderCharts(
+                        [getAverage(scoresSystem), getAverage(scoresSpeed), getAverage(scoresQuality), getAverage(scoresManner)],
+                        scoresOverall
+                    );
+
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('dashboardContent').classList.remove('hidden');
+                }
+            } catch (error) {
+                alert('เกิดข้อผิดพลาดในการดึงข้อมูล กรุณาตรวจสอบ URL หรือสิทธิ์การเข้าถึง');
+                console.error(error);
+            }
+        }
+
+        function renderCharts(avgScores, overallScoresArray) {
+            // สไตล์พื้นฐานของกราฟ
+            Chart.defaults.font.family = "'Prompt', sans-serif";
+            
+            // --- 1. กราฟแท่ง (Bar Chart) ---
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            if(barChartInstance) barChartInstance.destroy();
+            
+            barChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['ความสะดวกของระบบ', 'ความรวดเร็ว', 'คุณภาพงาน', 'มารยาทเจ้าหน้าที่'],
+                    datasets: [{
+                        label: 'คะแนนเฉลี่ย (เต็ม 5)',
+                        data: avgScores,
+                        backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'],
+                        borderRadius: 6,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 5 } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // --- 2. กราฟโดนัท (Doughnut Chart) นับสัดส่วนคะแนน ---
+            const scoreCounts = { '5':0, '4':0, '3':0, '2':0, '1':0 };
+            overallScoresArray.forEach(score => { if(scoreCounts[score] !== undefined) scoreCounts[score]++; });
+
+            const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+            if(doughnutChartInstance) doughnutChartInstance.destroy();
+
+            doughnutChartInstance = new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['5 ดาว', '4 ดาว', '3 ดาว', '2 ดาว', '1 ดาว'],
+                    datasets: [{
+                        data: [scoreCounts['5'], scoreCounts['4'], scoreCounts['3'], scoreCounts['2'], scoreCounts['1']],
+                        backgroundColor: ['#22c55e', '#84cc16', '#eab308', '#f97316', '#ef4444'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // โหลดข้อมูลทันทีที่เปิดหน้าเว็บ
+        window.onload = fetchData;
+    </script>
+</body>
+</html>
