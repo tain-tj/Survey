@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบประเมินแผนกเคหะรักษ์ | BCH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Prompt', sans-serif; } </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased selection:bg-blue-500 selection:text-white pb-10">
+
+    <div class="max-w-2xl mx-auto px-4 py-8">
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-6 rounded-2xl shadow-lg mb-6 text-center relative overflow-hidden">
+            <i class="fa-solid fa-star-half-stroke text-4xl mb-3 opacity-90"></i>
+            <h1 class="text-xl md:text-2xl font-semibold tracking-wide">ประเมินความพึงพอใจภาพรวม</h1>
+            <p class="text-blue-100 text-sm mt-1 font-light">แผนกเคหะรักษ์ โรงพยาบาลกรุงเทพคริสเตียน</p>
+        </div>
+
+        <form id="surveyForm" class="space-y-6">
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-5">
+                <h2 class="text-md font-semibold text-blue-900 border-l-4 border-blue-600 pl-2 mb-4">ให้คะแนนความพึงพอใจ (5 = ดีมาก, 1 = ปรับปรุง)</h2>
+                
+                <div class="space-y-2">
+                    <p class="text-sm font-medium text-slate-700">1. ความสะดวกในการใช้งานระบบแจ้งงาน (Web App) <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center gap-1 bg-slate-50 p-1.5 rounded-xl border border-slate-100 rating-container"></div>
+                </div>
+                <div class="space-y-2">
+                    <p class="text-sm font-medium text-slate-700">2. ความรวดเร็วและการตรงต่อเวลาในการให้บริการ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center gap-1 bg-slate-50 p-1.5 rounded-xl border border-slate-100 rating-container"></div>
+                </div>
+                <div class="space-y-2">
+                    <p class="text-sm font-medium text-slate-700">3. คุณภาพ ความสะอาด และความเรียบร้อยของงาน <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center gap-1 bg-slate-50 p-1.5 rounded-xl border border-slate-100 rating-container"></div>
+                </div>
+                <div class="space-y-2">
+                    <p class="text-sm font-medium text-slate-700">4. มารยาท ความสุภาพ และการสื่อสารของเจ้าหน้าที่ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center gap-1 bg-slate-50 p-1.5 rounded-xl border border-slate-100 rating-container"></div>
+                </div>
+                <div class="space-y-2 mt-4 pt-4 border-t border-slate-100">
+                    <p class="text-sm font-bold text-blue-800">5. ภาพรวมความพึงพอใจทั้งหมด <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center gap-1 bg-blue-50/50 p-1.5 rounded-xl border border-blue-100 rating-container"></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <label class="block text-sm font-medium text-slate-700 mb-2">ข้อเสนอแนะเพิ่มเติมเพื่อการปรับปรุง</label>
+                <textarea name="comments" rows="3" placeholder="พิมพ์ข้อความของคุณที่นี่..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex justify-center items-center gap-2 cursor-pointer text-sm">
+                <i class="fa-solid fa-paper-plane"></i> ส่งผลประเมิน
+            </button>
+        </form>
+
+        <div id="successModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-sm w-full space-y-4">
+                <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto border-2 border-green-500 text-green-500 text-2xl">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-slate-900">ขอบคุณสำหรับคำประเมิน</h3>
+                <p class="text-sm text-slate-500">ข้อมูลของท่านจะถูกนำไปพัฒนาการบริการให้ดียิ่งขึ้น</p>
+                <button onclick="window.location.reload()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-sm transition-all">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // *** สำคัญมาก: นำ URL Web App ของ Google Apps Script มาใส่ตรงนี้ ***
+        const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzLFGhinEUTxIOJ8SgoD-mdaP8I9AEjq44jCN_nse5-AYWhcJkGIEOJf3tRTgAVU94q/exec";
+
+        const ratingFields = ['scoreSystem', 'scoreSpeed', 'scoreQuality', 'scoreManner', 'scoreOverall'];
+        const containers = document.querySelectorAll('.rating-container');
+        
+        // สร้างปุ่ม 1-5 อัตโนมัติ
+        containers.forEach((container, index) => {
+            const fieldName = ratingFields[index];
+            let html = '';
+            for(let i = 1; i <= 5; i++) {
+                html += `
+                    <label class="flex-1 text-center cursor-pointer">
+                        <input type="radio" name="${fieldName}" value="${i}" required class="sr-only peer">
+                        <div class="py-2.5 rounded-lg text-sm font-medium text-slate-600 bg-white peer-checked:bg-blue-600 peer-checked:text-white border border-slate-200 peer-checked:border-blue-600 hover:bg-slate-100 transition-all shadow-sm">
+                            ${i}
+                        </div>
+                    </label>
+                `;
+            }
+            container.innerHTML = html;
+        });
+
+        // ส่งฟอร์ม
+        document.getElementById('surveyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังส่งข้อมูล...';
+
+            fetch(APP_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: new URLSearchParams(new FormData(this))
+            })
+            .then(() => {
+                document.getElementById('successModal').classList.remove('hidden');
+                this.reset();
+            })
+            .catch(() => {
+                alert('ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ส่งผลประเมิน';
+            });
+        });
+    </script>
+</body>
+</html>
