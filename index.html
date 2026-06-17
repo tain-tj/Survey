@@ -7,62 +7,96 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Prompt', sans-serif; } </style>
+    <style> 
+        body { font-family: 'Prompt', sans-serif; } 
+        
+        /* CSS สำหรับระบบให้คะแนนแบบดาว */
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse; /* เรียงจากขวาไปซ้าย เพื่อให้ CSS hover ทำงานได้ถูกต้อง */
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+        .star-rating input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .star-rating label {
+            cursor: pointer;
+            color: #e2e8f0; /* สีเทาเริ่มต้น */
+            font-size: 2.75rem; /* ขนาดดาวใหญ่สะใจ กดง่าย */
+            transition: color 0.2s ease-in-out, transform 0.1s;
+        }
+        /* เมื่อเอาเมาส์ชี้ หรือเมื่อเลือกแล้ว ให้ดาวดวงนั้นและดวงที่อยู่ก่อนหน้าเปลี่ยนเป็นสีทอง */
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input:checked ~ label {
+            color: #fbbf24; /* สีเหลืองทอง */
+        }
+        .star-rating label:active {
+            transform: scale(0.85); /* เอฟเฟกต์ยุบตัวตอนกด */
+        }
+    </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 antialiased selection:bg-blue-500 selection:text-white pb-10">
 
     <div class="max-w-2xl mx-auto px-4 py-8">
-        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-6 rounded-2xl shadow-lg mb-6 text-center relative overflow-hidden">
-            <i class="fa-solid fa-star-half-stroke text-4xl mb-3 opacity-90"></i>
-            <h1 class="text-xl md:text-2xl font-semibold tracking-wide">ประเมินความพึงพอใจภาพรวม</h1>
-            <p class="text-blue-100 text-sm mt-1 font-light">แผนกเคหะรักษ์ โรงพยาบาลกรุงเทพคริสเตียน</p>
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-8 rounded-2xl shadow-lg mb-8 text-center relative overflow-hidden">
+            <i class="fa-solid fa-star text-5xl mb-4 text-yellow-400 drop-shadow-md"></i>
+            <h1 class="text-2xl md:text-3xl font-semibold tracking-wide mb-2">ประเมินความพึงพอใจ</h1>
+            <p class="text-blue-100 text-base md:text-lg font-light">แผนกเคหะรักษ์ โรงพยาบาลกรุงเทพคริสเตียน</p>
         </div>
 
-        <form id="surveyForm" class="space-y-6">
+        <form id="surveyForm" class="space-y-8">
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-5">
-                <h2 class="text-md font-semibold text-blue-900 border-l-4 border-blue-600 pl-2 mb-4">ให้คะแนนความพึงพอใจ (5 = ดีมาก, 1 = ปรับปรุง)</h2>
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-8">
+                <h2 class="text-xl font-semibold text-blue-900 border-l-4 border-blue-600 pl-3 mb-6">กรุณาให้คะแนน (5 ดาว = ดีมาก)</h2>
                 
-                <div class="space-y-2">
-                    <p class="text-sm font-medium text-slate-700">1. ความสะดวกในการใช้งานระบบแจ้งงาน (Web App) <span class="text-red-500">*</span></p>
-                    <div class="flex justify-between items-center gap-1 bg-slate-50 p-1.5 rounded-xl border border-slate-100 rating-container"></div>
+                <div class="space-y-3">
+                    <p class="text-lg font-medium text-slate-700">1. ความสะดวกในการใช้งานระบบแจ้งงาน <span class="text-red-500">*</span></p>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 rating-container"></div>
                 </div>
-                <div class="space-y-2">
-                    <p class="text-sm font-medium text-slate-700">2. ความรวดเร็วและการตรงต่อเวลาในการให้บริการ <span class="text-red-500">*</span></p>
-                    <div class="flex justify-between items-center gap-1 bg-slate-50 p-1.5 rounded-xl border border-slate-100 rating-container"></div>
+                
+                <div class="space-y-3">
+                    <p class="text-lg font-medium text-slate-700">2. ความรวดเร็วและการตรงต่อเวลา <span class="text-red-500">*</span></p>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 rating-container"></div>
                 </div>
-                <div class="space-y-2">
-                    <p class="text-sm font-medium text-slate-700">3. คุณภาพ ความสะอาด และความเรียบร้อยของงาน <span class="text-red-500">*</span></p>
-                    <div class="flex justify-between items-center gap-1 bg-slate-50 p-1.5 rounded-xl border border-slate-100 rating-container"></div>
+                
+                <div class="space-y-3">
+                    <p class="text-lg font-medium text-slate-700">3. คุณภาพและความเรียบร้อยของงาน <span class="text-red-500">*</span></p>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 rating-container"></div>
                 </div>
-                <div class="space-y-2">
-                    <p class="text-sm font-medium text-slate-700">4. มารยาท ความสุภาพ และการสื่อสารของเจ้าหน้าที่ <span class="text-red-500">*</span></p>
-                    <div class="flex justify-between items-center gap-1 bg-slate-50 p-1.5 rounded-xl border border-slate-100 rating-container"></div>
+                
+                <div class="space-y-3">
+                    <p class="text-lg font-medium text-slate-700">4. มารยาทและการสื่อสารของเจ้าหน้าที่ <span class="text-red-500">*</span></p>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 rating-container"></div>
                 </div>
-                <div class="space-y-2 mt-4 pt-4 border-t border-slate-100">
-                    <p class="text-sm font-bold text-blue-800">5. ภาพรวมความพึงพอใจทั้งหมด <span class="text-red-500">*</span></p>
-                    <div class="flex justify-between items-center gap-1 bg-blue-50/50 p-1.5 rounded-xl border border-blue-100 rating-container"></div>
+                
+                <div class="space-y-3 mt-6 pt-6 border-t border-slate-200">
+                    <p class="text-xl font-bold text-blue-800">5. ภาพรวมความพึงพอใจทั้งหมด <span class="text-red-500">*</span></p>
+                    <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 rating-container"></div>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <label class="block text-sm font-medium text-slate-700 mb-2">ข้อเสนอแนะเพิ่มเติมเพื่อการปรับปรุง</label>
-                <textarea name="comments" rows="3" placeholder="พิมพ์ข้อความของคุณที่นี่..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></textarea>
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+                <label class="block text-lg font-medium text-slate-700 mb-3">ข้อเสนอแนะเพิ่มเติมเพื่อการปรับปรุง</label>
+                <textarea name="comments" rows="4" placeholder="พิมพ์ข้อความของคุณที่นี่..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-5 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"></textarea>
             </div>
 
-            <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex justify-center items-center gap-2 cursor-pointer text-sm">
+            <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 px-6 rounded-xl shadow-md hover:shadow-lg transition-all flex justify-center items-center gap-3 cursor-pointer text-xl">
                 <i class="fa-solid fa-paper-plane"></i> ส่งผลประเมิน
             </button>
         </form>
 
         <div id="successModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-sm w-full space-y-4">
-                <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto border-2 border-green-500 text-green-500 text-2xl">
+            <div class="bg-white p-10 rounded-2xl shadow-xl text-center max-w-md w-full space-y-6">
+                <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto border-4 border-green-500 text-green-500 text-4xl">
                     <i class="fa-solid fa-check"></i>
                 </div>
-                <h3 class="text-lg font-semibold text-slate-900">ขอบคุณสำหรับคำประเมิน</h3>
-                <p class="text-sm text-slate-500">ข้อมูลของท่านจะถูกนำไปพัฒนาการบริการให้ดียิ่งขึ้น</p>
-                <button onclick="window.location.reload()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-sm transition-all">ปิดหน้าต่าง</button>
+                <h3 class="text-2xl font-semibold text-slate-900">ขอบคุณสำหรับคำประเมิน</h3>
+                <p class="text-lg text-slate-600">ข้อมูลของท่านจะถูกนำไปพัฒนาการบริการให้ดียิ่งขึ้น</p>
+                <button onclick="window.location.reload()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium py-3 rounded-xl text-lg transition-all mt-4">เสร็จสิ้น</button>
             </div>
         </div>
     </div>
@@ -74,26 +108,38 @@
         const ratingFields = ['scoreSystem', 'scoreSpeed', 'scoreQuality', 'scoreManner', 'scoreOverall'];
         const containers = document.querySelectorAll('.rating-container');
         
-        // สร้างปุ่ม 1-5 อัตโนมัติ
+        // ฟังก์ชันสร้างปุ่มดาว 5 ดวงอัตโนมัติ (วนลูปถอยหลังเพื่อรองรับ CSS รหัส row-reverse)
         containers.forEach((container, index) => {
             const fieldName = ratingFields[index];
             let html = '';
-            for(let i = 1; i <= 5; i++) {
+            for(let i = 5; i >= 1; i--) {
                 html += `
-                    <label class="flex-1 text-center cursor-pointer">
-                        <input type="radio" name="${fieldName}" value="${i}" required class="sr-only peer">
-                        <div class="py-2.5 rounded-lg text-sm font-medium text-slate-600 bg-white peer-checked:bg-blue-600 peer-checked:text-white border border-slate-200 peer-checked:border-blue-600 hover:bg-slate-100 transition-all shadow-sm">
-                            ${i}
-                        </div>
+                    <input type="radio" id="${fieldName}-${i}" name="${fieldName}" value="${i}" required>
+                    <label for="${fieldName}-${i}" title="${i} ดาว">
+                        <i class="fa-solid fa-star drop-shadow-sm"></i>
                     </label>
                 `;
             }
             container.innerHTML = html;
+            container.classList.add('star-rating'); // เพิ่มคลาสสำหรับควบคุม CSS
         });
 
         // ส่งฟอร์ม
         document.getElementById('surveyForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // เช็คว่ากดดาวครบทุกข้อหรือไม่ (เพื่อความแน่ใจว่า input hidden ทำงาน)
+            let allAnswered = true;
+            ratingFields.forEach(field => {
+                if(!document.querySelector(`input[name="${field}"]:checked`)) {
+                    allAnswered = false;
+                }
+            });
+            if(!allAnswered) {
+                alert("กรุณาให้คะแนนดาวให้ครบทุกหัวข้อครับ");
+                return;
+            }
+
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังส่งข้อมูล...';
