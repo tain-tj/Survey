@@ -8,24 +8,31 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style> body { font-family: 'Prompt', sans-serif; } </style>
+    <style> 
+        body { font-family: 'Prompt', sans-serif; } 
+        /* แต่ง Scrollbar ให้สวยงามสำหรับกล่องคอมเมนต์ */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 antialiased p-4 md:p-8">
 
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-6xl mx-auto">
         <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-blue-900"><i class="fa-solid fa-chart-pie mr-2"></i> Dashboard สถิติความพึงพอใจ</h1>
+                <h1 class="text-2xl font-bold text-blue-900"><i class="fa-solid fa-chart-pie mr-2 text-blue-600"></i> Dashboard สถิติความพึงพอใจ</h1>
                 <p class="text-slate-500 text-sm mt-1">แผนกเคหะรักษ์ โรงพยาบาลกรุงเทพคริสเตียน</p>
             </div>
-            <button onclick="fetchData()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl text-sm font-medium shadow-sm transition-all flex items-center gap-2">
+            <button onclick="fetchData()" class="bg-white border border-slate-200 hover:bg-slate-50 text-blue-600 px-5 py-2.5 rounded-xl text-sm font-medium shadow-sm transition-all flex items-center gap-2 cursor-pointer">
                 <i class="fa-solid fa-rotate-right"></i> รีเฟรชข้อมูล
             </button>
         </div>
 
         <div id="loading" class="text-center py-20">
             <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500 mb-4"></i>
-            <p class="text-slate-500">กำลังดึงข้อมูลสถิติ...</p>
+            <p class="text-slate-500 font-medium">กำลังดึงข้อมูลสถิติ...</p>
         </div>
 
         <div id="dashboardContent" class="hidden space-y-6">
@@ -39,7 +46,7 @@
                     </div>
                 </div>
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 text-xl"><i class="fa-solid fa-star"></i></div>
+                    <div class="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-pink-600 text-xl"><i class="fa-solid fa-star"></i></div>
                     <div>
                         <p class="text-slate-500 text-sm">คะแนนภาพรวมเฉลี่ย</p>
                         <h3 class="text-2xl font-bold text-slate-800" id="avgOverall">0.00</h3>
@@ -63,17 +70,23 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2">
-                    <h3 class="text-md font-semibold text-slate-800 mb-4">คะแนนเฉลี่ยแยกตามหัวข้อการประเมิน</h3>
-                    <div class="relative h-64 w-full">
+                    <h3 class="text-md font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-column text-blue-500 mr-2"></i> คะแนนเฉลี่ยแยกตามหัวข้อ</h3>
+                    <div class="relative h-72 w-full">
                         <canvas id="barChart"></canvas>
                     </div>
                 </div>
 
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 class="text-md font-semibold text-slate-800 mb-4">สัดส่วนคะแนนความพึงพอใจรวม</h3>
-                    <div class="relative h-64 w-full flex justify-center">
+                    <h3 class="text-md font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie text-blue-500 mr-2"></i> สัดส่วนความพึงพอใจรวม</h3>
+                    <div class="relative h-72 w-full flex justify-center">
                         <canvas id="doughnutChart"></canvas>
                     </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-3">
+                    <h3 class="text-md font-semibold text-slate-800 mb-4"><i class="fa-regular fa-comments text-blue-500 mr-2"></i> ข้อเสนอแนะเพิ่มเติมจากผู้ใช้งาน</h3>
+                    <div id="commentsContainer" class="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">
+                        </div>
                 </div>
             </div>
         </div>
@@ -86,7 +99,6 @@
         let barChartInstance = null;
         let doughnutChartInstance = null;
 
-        // ฟังก์ชันคำนวณค่าเฉลี่ย
         const getAverage = (arr) => arr.length ? (arr.reduce((a, b) => a + Number(b), 0) / arr.length).toFixed(2) : "0.00";
 
         async function fetchData() {
@@ -98,9 +110,8 @@
                 const result = await response.json();
 
                 if(result.status === 'success') {
-                    const data = result.data.filter(row => row.scoreOverall); // กรองเอาเฉพาะแถวที่มีข้อมูล
+                    const data = result.data.filter(row => row.scoreOverall); 
                     
-                    // อัปเดตการ์ดตัวเลข
                     document.getElementById('totalResponses').innerText = data.length;
                     
                     const scoresOverall = data.map(r => r.scoreOverall);
@@ -108,16 +119,20 @@
                     const scoresQuality = data.map(r => r.scoreQuality);
                     const scoresSystem = data.map(r => r.scoreSystem);
                     const scoresManner = data.map(r => r.scoreManner);
+                    
+                    // ดึงข้อเสนอแนะ กรองเฉพาะอันที่ไม่ได้พิมพ์ว่างเปล่า
+                    const comments = data.map(r => r.comments).filter(c => c && c.toString().trim() !== "");
 
                     document.getElementById('avgOverall').innerText = getAverage(scoresOverall);
                     document.getElementById('avgSpeed').innerText = getAverage(scoresSpeed);
                     document.getElementById('avgQuality').innerText = getAverage(scoresQuality);
 
-                    // สร้างกราฟ
                     renderCharts(
-                        [getAverage(scoresSystem), getAverage(scoresSpeed), getAverage(scoresQuality), getAverage(scoresManner)],
+                        [getAverage(scoresSystem), getAverage(scoresSpeed), getAverage(scoresQuality), getAverage(scoresManner), getAverage(scoresOverall)],
                         scoresOverall
                     );
+
+                    renderComments(comments);
 
                     document.getElementById('loading').classList.add('hidden');
                     document.getElementById('dashboardContent').classList.remove('hidden');
@@ -129,21 +144,21 @@
         }
 
         function renderCharts(avgScores, overallScoresArray) {
-            // สไตล์พื้นฐานของกราฟ
             Chart.defaults.font.family = "'Prompt', sans-serif";
             
-            // --- 1. กราฟแท่ง (Bar Chart) ---
+            // --- 1. กราฟแท่ง (Bar Chart) อัปเดตสีและเพิ่มแท่งความพึงพอใจรวม ---
             const ctxBar = document.getElementById('barChart').getContext('2d');
             if(barChartInstance) barChartInstance.destroy();
             
             barChartInstance = new Chart(ctxBar, {
                 type: 'bar',
                 data: {
-                    labels: ['ความสะดวกของระบบ', 'ความรวดเร็ว', 'คุณภาพงาน', 'มารยาทเจ้าหน้าที่'],
+                    labels: ['ระบบ Web App', 'ความรวดเร็ว', 'คุณภาพงาน', 'มารยาท', 'ภาพรวมทั้งหมด'],
                     datasets: [{
                         label: 'คะแนนเฉลี่ย (เต็ม 5)',
                         data: avgScores,
-                        backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'],
+                        // กำหนดสีแท่งกราฟให้ต่างกันอย่างชัดเจน
+                        backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'],
                         borderRadius: 6,
                         barPercentage: 0.6
                     }]
@@ -156,7 +171,7 @@
                 }
             });
 
-            // --- 2. กราฟโดนัท (Doughnut Chart) นับสัดส่วนคะแนน ---
+            // --- 2. กราฟโดนัท (Doughnut Chart) อัปเดตโทนสีให้ชัดเจน ---
             const scoreCounts = { '5':0, '4':0, '3':0, '2':0, '1':0 };
             overallScoresArray.forEach(score => { if(scoreCounts[score] !== undefined) scoreCounts[score]++; });
 
@@ -169,21 +184,46 @@
                     labels: ['5 ดาว', '4 ดาว', '3 ดาว', '2 ดาว', '1 ดาว'],
                     datasets: [{
                         data: [scoreCounts['5'], scoreCounts['4'], scoreCounts['3'], scoreCounts['2'], scoreCounts['1']],
-                        backgroundColor: ['#22c55e', '#84cc16', '#eab308', '#f97316', '#ef4444'],
-                        borderWidth: 0,
-                        hoverOffset: 4
+                        // โทนสี เขียวเข้ม -> แดง
+                        backgroundColor: ['#16a34a', '#84cc16', '#facc15', '#f97316', '#ef4444'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } },
-                    cutout: '70%'
+                    plugins: { legend: { position: 'right' } }, // ย้าย Legend ไปด้านขวาให้อ่านง่าย
+                    cutout: '65%'
                 }
             });
         }
 
-        // โหลดข้อมูลทันทีที่เปิดหน้าเว็บ
+        // ฟังก์ชันสำหรับแสดงข้อเสนอแนะ
+        function renderComments(commentsArray) {
+            const container = document.getElementById('commentsContainer');
+            container.innerHTML = '';
+
+            if (commentsArray.length === 0) {
+                container.innerHTML = '<p class="text-slate-400 text-center py-6 italic">ยังไม่มีข้อเสนอแนะเพิ่มเติม</p>';
+                return;
+            }
+
+            // นำ array มา reverse เพื่อให้คอมเมนต์ล่าสุด (แถวข้อล่างสุดใน Sheet) แสดงขึ้นก่อน
+            const reversedComments = [...commentsArray].reverse();
+
+            reversedComments.forEach(comment => {
+                const commentBox = `
+                    <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex gap-3 text-sm text-slate-700 transition-all hover:bg-blue-50">
+                        <i class="fa-solid fa-comment-dots text-blue-400 text-lg mt-0.5"></i>
+                        <p class="leading-relaxed">${comment}</p>
+                    </div>
+                `;
+                container.innerHTML += commentBox;
+            });
+        }
+
         window.onload = fetchData;
     </script>
 </body>
